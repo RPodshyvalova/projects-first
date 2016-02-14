@@ -3,10 +3,19 @@ package calendarforthecurrentmonth;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 
+/**
+ *  colorize days in calendar of month:
+ *  - RED - for weekends 
+ *  - GREEN - for today
+ *  - GRAY - other days
+ */
+
 public class ModelForMonth {
-    public static final String ANSI_BLACK = "\u001B[0m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_CLEAR = "\033[0m";
+    public static final String ANSI_RED = "\033[31m";
+    public static final String ANSI_GREEN = "\033[42m";
+    public static final String ANSI_GRAY = "\033[30m";
+
     private Object model[][] = new Object[6][7];
     private LocalDate currentDate;
     
@@ -28,27 +37,31 @@ public class ModelForMonth {
         int currentDay = currentDate.getDayOfMonth();
         System.out.println(currentDate.getMonth() + " " + currentDate.getYear() + " year");
         for (String  day : daysOfWeek) {
-            System.out.print(String.format("%14s |", day));
+            System.out.printf("%19s |",  ANSI_GRAY + day + ANSI_CLEAR);
         }
         System.out.println();
         for (int i = 0; i < model.length; i++) {
             for (int j = 0; j < model[i].length; j++) {
                 if (model[i][j] != null && String.valueOf(currentDay).equals(model[i][j].toString())) {
-                    model[i][j] = ANSI_GREEN + model[i][j] + ANSI_BLACK;
+                    colorizeAndPrintValue(model[i][j].toString(), ANSI_GREEN);
+                } else if (j <  model[i].length - 2) {
+                    if (model[i][j] != null) { 
+                        colorizeAndPrintValue(model[i][j].toString(), ANSI_GRAY); 
+                    } else {
+                        colorizeAndPrintValue("", ANSI_GRAY);     
+                    }
+                } else if (model[i][j] != null) {
+                    colorizeAndPrintValue(model[i][j].toString(), ANSI_RED);
                 } 
-                if (j <  model[i].length - 2) {
-                    model[i][j] =  model[i][j] != null ? model[i][j] : ""; 
-                }else {
-                    model[i][j] =  model[i][j] != null ? ANSI_RED  + model[i][j] + ANSI_BLACK : "";
- 
-                }
-                System.out.print(String.format("%14s |", model[i][j]));
             }
             System.out.println();
         }
-  
     }
-
+    
+    private void colorizeAndPrintValue(String value, String color) {
+        System.out.printf("%19s |", color + value + ANSI_CLEAR);
+    }
+    
     public void fillModel() {
         int shift = currentDate.with(TemporalAdjusters.firstDayOfMonth()).getDayOfWeek().getValue();
         shift--;
